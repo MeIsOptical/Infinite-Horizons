@@ -1,0 +1,1 @@
+Scale images to 500%

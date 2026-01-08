@@ -1,0 +1,944 @@
+/* Dream Game - Cleaned/style.css */
+
+/*#region THEME & GLOBALS */
+:root {
+    /* Centralized color palette for easy theming */
+    --primary-color: #ff0055;
+    --primary-hover: #ff3377;
+    --text-color: #ffffff;
+    --bg-dark: #111111;
+    --border-color: #000000;
+}
+
+* {
+    font-family: 'Jersey 10', sans-serif;
+    box-sizing: border-box;
+    cursor: default;
+    user-select: none;
+}
+
+::selection {
+    /* Custom text selection color to match the pink theme */
+    background: var(--primary-color);
+    color: black;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Prevents scrollbars during game movement */
+    background-color: black;
+}
+/*#endregion */
+
+
+/*#region ANIMATIONS */
+/* Creates an infinite scrolling background effect */
+@keyframes scrollGrid {
+    0% { background-position: 0 0; }
+    100% { background-position: 50px 50px; }
+}
+
+@keyframes titleBreathe {
+    0% { opacity: 0.2; }
+    50% { opacity: 0.9; }
+    100% { opacity: 0.2; }
+}
+
+/* Subtle pulse effect for UI focus/idle states */
+@keyframes breathe {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+/* 4-Stage Toast Animation */
+@keyframes slideInFade {
+    0% { transform: translateY(-50px); opacity: 0; }
+    15% { transform: translateY(0); opacity: 1; }
+    85% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-20px); opacity: 0; }
+}
+
+@keyframes levelUpFloat {
+    0% { transform: translate(-50%, 0) scale(0.5); opacity: 0; }
+    20% { transform: translate(-50%, -20px) scale(1.3); opacity: 1; }
+    80% { transform: translate(-50%, -50px) scale(1.0); opacity: 1; }
+    100% { transform: translate(-50%, -80px) scale(1); opacity: 0; }
+}
+/*#endregion */
+
+
+/*#region BACKGROUNDS & CANVAS */
+canvas {
+    display: block;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+}
+
+/* CRT Scanline & Vignette Overlay */
+#screen-effects {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none; /* Allows clicking through to game */
+    z-index: 999; /* Sit on top of everything */
+    
+    /* CRT Scanlines pattern */
+    background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%, 
+        rgba(0, 0, 0, 0.03) 50%
+    );
+    background-size: 100% 4px;
+    
+    /* Darken corners */
+    box-shadow: inset 0 0 100px rgba(0,0,0,0.4);
+}
+/*#endregion */
+
+
+/*#region HUD (HEADS UP DISPLAY) */
+#hud {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none; /* Crucial: lets clicks pass through to the canvas */
+    z-index: 90;
+}
+
+/* Coordinate display (Top Right) */
+#coords {
+    position: absolute;
+    top: 15px;
+    right: 15px; 
+    
+    background-color: rgba(0, 0, 0, 0.7);
+    color: var(--text-color);
+    font-size: 20px;
+    border: 3px solid var(--text-color);
+    padding: 5px 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    text-align: right;
+}
+
+/* -- Icon Buttons -- */
+.ingame-icon-btn {
+    position: absolute;
+    pointer-events: auto;
+    
+    width: 80px;
+    height: 80px;
+    padding: 10px;
+    margin: 0;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    
+    background-color: #222;
+    color: white;
+    border: 3px solid white;
+    box-shadow: 4px 4px 5px rgba(0,0,0,0.5);
+    animation: none; 
+    transition: all 0.1s;
+}
+
+.icon-btn:hover {
+    background-color: var(--primary-color);
+    border-color: white;
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px rgba(0,0,0,0.5);
+}
+
+.icon-btn:active {
+    transform: translate(0, 0);
+    box-shadow: 2px 2px 0px rgba(0,0,0,0.5);
+}
+
+.ingame-icon-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    image-rendering: pixelated;
+    display: block;
+}
+
+#ingame-settings-btn {
+    top: 15px;
+    left: 15px;    
+}
+
+#perk-menu-btn {
+    bottom: 15px;
+    left: 15px;    
+}
+
+/* -- Player Bars -- */
+#player_bars_container {
+    position: absolute;
+    display: block;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 400px;
+}
+
+/* Health Bar */
+#player-health-container {
+    height: 35px;
+    width: 100%;
+    background-color: #222;
+    border: 3px solid white;
+    padding: 3px;
+    margin: 3px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.6);
+}
+
+#player-health-bar {
+    width: 100%;
+    height: 100%;
+    background-color: var(--primary-color);
+    transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* XP Bar & Level */
+#player-xp-container {
+    height: 10px;
+    width: 100%;
+    background-color: #42643f;
+    border: 3px solid #222;
+    padding: 0;
+    margin: 3px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.6);
+}
+
+#player-xp-bar {
+    width: 100%;
+    height: 100%;
+    background-color: #6aff6a;
+    transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#player-level {
+    position: absolute;
+    right: 100%;
+    bottom: 0;
+    margin-right: 6px;
+    font-size: 35px;
+    color: white;
+    text-shadow: 2px 2px 0 #000;
+    text-align: right;
+    white-space: nowrap;
+}
+/*#endregion */
+
+
+/*#region QUEST SYSTEM UI */
+/* 1. Notifications (Toasts) */
+#quest-notifications {
+    position: absolute;
+    top: 25%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
+    z-index: 150;
+}
+
+.notification-toast {
+    background: rgba(0, 0, 0, 0.9);
+    border: 2px solid var(--primary-color);
+    padding: 15px 30px;
+    margin-bottom: 10px;
+    text-align: center;
+    box-shadow: 0 0 15px var(--primary-color);
+    animation: slideInFade 4s forwards;
+    opacity: 0;
+}
+
+.notif-title {
+    font-size: 32px;
+    color: var(--primary-color);
+    text-transform: uppercase;
+    text-shadow: 2px 2px 0 black;
+    margin-bottom: 5px;
+    letter-spacing: 2px;
+}
+
+.notif-sub {
+    font-size: 24px;
+    color: white;
+}
+
+/* 2. Top Quest Tracker */
+#quest-tracker {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    
+    background-color: rgba(0, 0, 0, 0.8);
+    border: 3px solid var(--text-color);
+    padding: 10px 20px;
+    text-align: center;
+    min-width: 300px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    z-index: 95;
+}
+
+.quest-header {
+    font-size: 16px;
+    color: var(--primary-color);
+    letter-spacing: 2px;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+
+#quest-tracker-desc {
+    font-size: 24px;
+    color: white;
+    margin-bottom: 5px;
+}
+
+#quest-tracker-progress {
+    font-size: 18px;
+    color: #aaa;
+}
+
+/* 3. Story/Chapter Modal (Fullscreen) */
+#story-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 250; /* Highest priority UI */
+    
+    background-color: rgba(0, 0, 0, 0.95);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.story-content {
+    width: 60%;
+    max-width: 800px;
+    border: 4px solid white;
+    padding: 40px;
+    background-color: #111;
+    box-shadow: 0 0 30px var(--primary-color);
+    text-align: left;
+    animation: breathe 4s infinite ease-in-out;
+}
+
+#story-chapter-title {
+    font-size: 60px;
+    color: var(--primary-color);
+    margin: 0;
+    text-shadow: 4px 4px 0px black;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+.story-divider {
+    width: 100%;
+    height: 4px;
+    background-color: white;
+    margin: 20px 0;
+}
+
+#story-intro-text {
+    font-size: 28px;
+    color: #ddd;
+    line-height: 1.4;
+    margin-bottom: 30px;
+}
+
+.story-objective-box {
+    background-color: #222;
+    border: 2px dashed var(--primary-color);
+    padding: 15px;
+    margin-bottom: 30px;
+}
+
+.story-label {
+    display: block;
+    color: var(--primary-color);
+    font-size: 20px;
+    margin-bottom: 5px;
+}
+
+#story-objective-desc {
+    font-size: 32px;
+    color: white;
+}
+
+#story-continue-btn {
+    font-size: 30px;
+    padding: 10px 40px;
+    display: block;      
+    margin: 20px auto;   
+}
+/*#endregion */
+
+
+/*#region MENUS & LAYOUT */
+#menu-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 50;
+    
+    background-color: var(--bg-dark);
+    /* Dotted grid pattern */
+    background-image: 
+        linear-gradient(rgba(255, 0, 85, 0.15) 2px, transparent 2px), 
+        linear-gradient(90deg, rgba(255, 0, 85, 0.15) 2px, transparent 2px);
+    background-size: 50px 50px;
+    animation: scrollGrid 4s linear infinite;
+}
+
+/* Common container style for all full-screen menus */
+#main-menu, 
+#new-world-settings, 
+#world-gen-loading, 
+#world-manager, 
+#ingame-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    
+    z-index: 100;
+    color: var(--text-color);
+    text-align: center;
+}
+
+/* In-game menu sits above HUD but below Story Modal */
+#ingame-menu {
+    z-index: 200;
+    background-color: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
+}
+
+
+h1, h2 {
+    font-size: 10rem;
+    margin: 0;
+    margin-bottom: 10px;
+    position: relative;
+    text-shadow: var(--primary-color) 5px 5px 0;
+}
+
+h1::before {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 0;
+    text-shadow: var(--primary-color) 0 0 60px;
+    animation: titleBreathe 5s infinite ease-in-out;
+}
+
+h1 { 
+    font-size: 15rem; 
+}
+
+
+/*#endregion */
+
+
+/*#region INPUTS & LISTS */
+#world-prompt, 
+#story-prompt, 
+#world-preset-select {
+    width: 50%;
+    max-width: 600px;
+    margin: 10px 0;
+    padding: 15px;
+    
+    border: 4px solid white; 
+    border-radius: 0px; 
+    background-color: rgba(34, 34, 34, 0.9);
+    color: white;
+    font-size: 24px;
+    resize: none;
+    outline: none;
+    box-shadow: 8px 8px 5px rgba(0,0,0,0.5);
+}
+
+#world-prompt:focus, 
+#story-prompt:focus, 
+#world-preset-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 15px var(--primary-color);
+}
+
+/* Scrollable Container for Saves */
+#world-list-container {
+    width: 70%;
+    height: 50vh;
+    overflow-y: auto;
+    border: 4px solid white;
+    background-color: rgba(20, 20, 20, 0.9);
+    padding: 10px;
+    margin-bottom: 20px;
+    box-shadow: 8px 8px 0px rgba(0,0,0,0.5);
+}
+
+.world-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #333;
+    padding: 10px 20px;
+    margin-bottom: 10px;
+    border: 2px solid #555;
+    transition: all 0.2s;
+    text-align: left;
+}
+
+.world-list-item:hover {
+    border-color: var(--primary-color);
+    transform: scale(1.003);
+}
+
+.world-info h3 {
+    margin: 0;
+    padding: 0;
+    font-size: 2rem;
+    color: white;
+}
+
+.world-info p {
+    margin: 0;
+    padding: 0;
+    color: #aaa;
+    font-size: 1.2rem;
+}
+/*#endregion */
+
+
+/*#region BUTTONS */
+/* General Main Menu Buttons */
+button:where(:not(.special-btn)) {
+    font-size: 50px;
+    background-color: var(--primary-color);
+    color: white; 
+    border: 4px solid var(--border-color);
+    padding: 15px 30px;
+    cursor: pointer;
+    box-shadow: 4px 4px 5px rgba(0,0,0,0.5);
+    transition: all 0.1s;
+    margin-top: 20px;
+}
+
+button:active:where(:not(.special-btn)) {
+    transform: translate(4px, 4px);
+    box-shadow: 4px 4px 5px var(--border-color);
+}
+
+button:hover:where(:not(.special-btn)) {
+    background-color: var(--primary-hover);
+    color: white;
+    border-color: white;
+    animation: breathe 0.5s ease-in-out infinite;
+}
+
+/* Save Management Buttons (Icons) */
+.delete-world-btn, .play-world-btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 50px;
+    height: 50px;
+    padding: 10px;
+    margin-top: 0;
+    animation: none;
+}
+
+.delete-world-btn {
+    background-color: #d32f2f;
+}
+
+.delete-world-btn:hover {
+    background-color: #ff5252;
+    border-color: white;
+    color: white;
+    animation: none;
+    transform: scale(1.05);
+    box-shadow: 4px 4px 5px rgba(0,0,0,0.5);
+}
+
+.play-world-btn {
+    margin-left: 10px;
+}
+
+.play-world-btn:hover {
+    animation: none;
+    transform: scale(1.05);
+    box-shadow: 4px 4px 5px rgba(0,0,0,0.5);
+}
+
+button svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+}
+/*#endregion */
+
+
+/*#region LOADING SCREEN */
+#world-gen-loading {
+    z-index: 200; 
+}
+
+#world-gen-loading h2 {
+    font-size: 48px;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 0px black;
+}
+
+#world-gen-loading-bar-container {
+    width: 400px;
+    height: 40px;
+    background-color: #222;
+    border: 4px solid white;
+    border-radius: 0px;
+    margin: 20px 0;
+    padding: 4px;
+    box-shadow: 0 0 20px rgba(255, 0, 85, 0.3);
+}
+
+#world-gen-loading-bar {
+    width: 0; /* Animated via JS */
+    height: 100%;
+    background-color: var(--primary-color);
+    transition: width 0.5s ease-out;
+    
+    /* Striped loading bar pattern */
+    background-image: linear-gradient(
+        45deg, 
+        rgba(255, 255, 255, 0.2) 25%, 
+        transparent 25%, 
+        transparent 50%, 
+        rgba(255, 255, 255, 0.2) 50%, 
+        rgba(255, 255, 255, 0.2) 75%, 
+        transparent 75%, 
+        transparent
+    );
+    background-size: 20px 20px;
+}
+
+#world-gen-loading-text {
+    font-size: 24px;
+    color: #ccc;
+    margin-top: 10px;
+    background-color: rgba(0,0,0,0.5);
+    padding: 5px 10px;
+    border: 1px solid #444;
+}
+/*#endregion */
+
+
+/*#region Dialogues */
+.pixel-box {
+    background: #000;
+    border: 4px solid #fff;
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
+    image-rendering: pixelated;
+}
+
+.dialogue-btn {
+    background: #000;
+    color: #fff;
+    border: 2px solid #fff;
+    padding: 10px 15px;
+    font-family: 'Jersey 10', sans-serif;
+    font-size: 24px;
+    text-align: left;
+    cursor: pointer;
+    transition: transform 0.1s;
+    margin-bottom: 8px;
+}
+
+.dialogue-btn:hover {
+    background: #fff;
+    color: #000;
+    transform: translateX(5px);
+}
+
+.dialogue-speaker {
+    color: var(--primary-color);
+    font-size: 32px;
+    margin: 0 0 10px 0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border-bottom: 2px solid #333;
+    padding-bottom: 5px;
+}
+
+.dialogue-text {
+    color: #fff; 
+    font-size: 28px;
+    line-height: 1.3;
+    margin-bottom: 20px;
+    min-height: 80px;
+}
+/*#endregion */
+
+
+/*#region LEVEL & PERKS */
+.level-up-msg {
+    position: fixed;
+    top: 40%;
+    left: 50%;
+    transform: translateX(-50%);
+    
+    text-align: center;
+    font-size: 3rem;
+    color: #6aff6a;
+    text-shadow: 4px 4px 5px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    z-index: 200;
+    
+    animation: levelUpFloat 3s forwards;
+}
+
+#perk-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+
+    padding: 0;
+    z-index: 9999;
+    flex-direction: column;
+
+    background-color: rgba(0, 0, 0, 0.95);
+    justify-content: center;
+    align-items: center;
+}
+
+#perk-container {
+    position: relative;
+    width: 80%;
+    height: 80%;
+
+    z-index: 9999;
+    border: 4px solid white;
+    padding: 40px;
+    background-color: #111;
+    box-shadow: 0 0 40px var(--primary-color);
+    text-align: left;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+.perk-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    background-color: #252525;
+    border: #070707 3px solid;
+    width: 100%;
+    max-height: 63%;
+    margin-top: 20px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.perk-list button, h3 {
+    margin: 0;
+    font-size: 2rem;
+}
+
+.perk-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    
+    background-color: #222;
+    background-image: linear-gradient(
+        -45deg, 
+        #1a1a1a 25%, 
+        #111 25%, 
+        #111 50%, 
+        #1a1a1a 50%, 
+        #1a1a1a 75%, 
+        #111 75%, 
+        #111
+    );
+    background-size: 10px 10px;
+
+    border: 2px solid #666;
+    padding: 8px;
+    min-width: 350px;
+    max-width: 600px;
+    min-height: 100px;
+    
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.perk-item:hover {
+    transform: scale(1.02);
+    border-color: var(--primary-color);
+}
+
+.perk-item p {
+    font-size: 1.7rem;
+    margin: 0 0 5px;
+}
+
+.perk-item img {
+    position: absolute;
+    top: 13px;
+    left: 13px;
+    width: 10%;
+    padding: 0;
+    margin: 0;
+    object-fit: contain;
+    image-rendering: pixelated;
+    display: block;
+}
+
+.perk-upgrade-btn:disabled {
+    cursor: not-allowed;
+    background-color: #312b2d;
+    opacity: 0.7;
+}
+
+#perks-leave-btn {
+    background-color: #333;
+    width: min-content;
+    position: absolute;
+    right: 15px;
+    bottom: 15px
+}
+
+#perk-points-colored {
+    color: var(--primary-color);
+}
+/*#endregion*/
+
+
+/*#region INVENTORY */
+#inv-container {
+    margin: 0;
+    padding: 0;
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+}
+
+.inv-slot {
+    width: 75px;
+    height: 75px;
+    background: #555;
+    border: #444 5px solid;
+    display: inline-flex; 
+    vertical-align: top;
+    margin-left: 10px;
+    padding: 5px;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.1s;
+}
+
+.inv-slot img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    display: block;
+}
+
+#inv-item-info {
+    margin: 0;
+    padding: 0;
+    color: white;
+    position: absolute;
+    bottom: 85px;
+    right: 2px;
+    font-size: 2.4rem;
+    text-shadow: 0 0 5px #000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#inv-item-info span {
+    margin: 0;
+    padding: 0;
+    font-size: 1.6rem;
+    color: #ccc;
+    white-space: nowrap; 
+}
+/*#endregion*/
+
+
+
+/*#region MAIN MENU SPECIAL BUTTONS */
+
+.system-btn {
+    width: 500px;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    font-size: 3rem;
+    background: transparent;
+    color: var(--primary-color);
+    border: none;
+    padding: 12px 40px;
+    letter-spacing: 2px;
+    background-image: linear-gradient(rgba(0,0,0,0) 50%, rgba(0,0,0,0.3) 50%);
+    background-size: 100% 4px;
+    position: relative;
+}
+
+.system-btn::before, .system-btn::after {
+    content: '';
+    position: absolute;
+    width: 10px; height: 100%; top: 0;
+    border-top: 2px solid var(--primary-color);
+    border-bottom: 2px solid var(--primary-color);
+    transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.system-btn::before { left: 0; border-left: 2px solid var(--primary-color); }
+.system-btn::after { right: 0; border-right: 2px solid var(--primary-color); }
+
+.system-btn:hover {
+    background-color: rgba(239, 68, 68, 0.05);
+    letter-spacing: 5px;
+    text-shadow: 0 0 8px var(--primary-color);
+}
+
+.system-btn:hover::before { transform: translateX(-8px); }
+.system-btn:hover::after { transform: translateX(8px); }
+
+/*#endregion*/

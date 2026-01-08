@@ -1,0 +1,203 @@
+<html>
+    <head>
+        <title>Infinite Horizons</title>
+        <link rel="stylesheet" type="text/css" href="style.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Jersey+10&display=swap" rel="stylesheet">
+    </head>
+
+    <body>
+        <div id="menu-background"></div>
+
+        <!-- MAIN MENU -->
+        <div id="main-menu">
+            <h1 data-text="Infinite Horizons">Infinite Horizons</h1>
+            <div style="display: flex; flex-direction: column; gap: 30px; margin-top: 50px">
+                <button id="start-btn" class="special-btn system-btn">New World</button>
+                <button id="manage-btn" class="special-btn system-btn">Load World</button>
+            </div>
+        </div>
+
+        <!-- NEW WORLD SETTINGS -->
+        <div id="new-world-settings" style="display: none;">
+            <h2 data-text="World Settings">World Settings</h2>
+
+            <p style="margin-bottom: 5px; font-family: 'Jersey 10', sans-serif; font-size: 20px;">Generation Mode:</p>
+            <select id="world-preset-select">
+                <option value="custom">Custom (AI Generated)</option>
+            </select>
+            
+            <p style="margin-bottom: 5px; font-family: 'Jersey 10', sans-serif; font-size: 20px;">World Description (Biomes, Colors, Theme):</p>
+            <textarea id="world-prompt" rows="3" placeholder="Describe your world (e.g. 'A radioactive wasteland with purple skies')"></textarea>
+                
+            <p style="margin-bottom: 5px; margin-top: 15px; font-family: 'Jersey 10', sans-serif; font-size: 20px;">Story Description (Optional):</p>
+            <textarea id="story-prompt" rows="3" placeholder="Describe your story (e.g., 'A survival horror where the player is hunted by robots')"></textarea>
+
+            <div style="display: flex; gap: 20px; margin-top: 20px;">
+                <button id="back-btn" style="background-color: #333; color: white;">Back</button>
+                <button id="generate-btn">Generate & Play</button>
+            </div>
+        </div>
+
+        <!-- LOADED WORLDS LIST -->
+        <div id="world-manager" style="display: none;">
+            <h2 data-text="Saved Worlds">Saved Worlds</h2>
+            <div id="world-list-container">
+                <p>No saved worlds found.</p>
+            </div>
+            <button id="manager-back-btn" style="background-color: #333; margin-top: 20px;">Back</button>
+        </div>
+
+        <div id="world-gen-loading" style="display: none;">
+            <h2 data-text="Loading...">Loading...</h2>
+            <div id="world-gen-loading-bar-container">
+                <div id="world-gen-loading-bar"></div>
+            </div>
+            <p id="world-gen-loading-text">Generating world...</p>
+        </div>
+
+        <div id="story-modal" style="display: none;">
+            <div class="story-content">
+                <h2 id="story-chapter-title">CHAPTER I</h2>
+                <div class="story-divider"></div>
+                <p id="story-intro-text">The story text goes here...</p>
+                
+                <div class="story-objective-box">
+                    <span class="story-label">CURRENT OBJECTIVE:</span>
+                    <span id="story-objective-desc">Kill 5 Rats</span>
+                </div>
+
+                <button id="story-continue-btn">CONTINUE</button>
+            </div>
+        </div>
+        
+        <!-- QUEST DIALOGUE UI -->
+        <div id="dialogue-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: flex-end; padding-bottom: 60px;">
+            <div class="pixel-box" style="width: 70%; max-width: 900px; padding: 30px; display: flex; flex-direction: column;">
+                <h3 id="dialogue-speaker" class="dialogue-speaker">Speaker Name</h3>
+                <p id="dialogue-text" class="dialogue-text">...</p>
+                <div id="dialogue-choices" style="display: flex; flex-direction: column;">
+                    </div>
+            </div>
+        </div>
+
+        <!-- HUD -->
+        <div id="hud" style="display: none;">
+            <div id="quest-tracker">
+                <div class="quest-header">CURRENT OBJECTIVE</div>
+                <div id="quest-tracker-desc">Loading...</div>
+                <div id="quest-tracker-progress">--/--</div>
+            </div>
+            
+            <div id="quest-notifications"></div>
+
+            <!-- SETTINGS BUTTON -->
+            <button id="ingame-settings-btn" class="ingame-icon-btn" aria-label="Settings">
+                <img src="assets/ui/icons/settings.png" alt="Settings">
+            </button>
+
+            <!-- PERKS BUTTON -->
+            <button id="perk-menu-btn" class="ingame-icon-btn" aria-label="Perks">
+                <img src="assets/ui/icons/perks.png" alt="Perks">
+            </button>
+
+            <!-- PLAYER BARS -->
+            <div id="player_bars_container">
+                <div id="player-level">Lv. 1</div>
+                <div id="player-xp-container">
+                    <div id="player-xp-bar"></div>
+                </div>
+
+                <div id="player-health-container">
+                    <div id="player-health-bar"></div>
+                </div>
+            </div>
+
+            <!-- LOCATION INFO -->
+            <div id="coords">Coords: 0, 0 | Location: Unknown</div>
+
+
+            <!-- INVENTORY -->
+            <div id="inv-container">
+                <p id="inv-item-info">Item Name</p>
+                <div id="inv-slots-wrapper"></div>
+            </div>
+        </div>
+
+
+        <!-- PAUSE MENU -->
+        <div id="ingame-menu" style="display: none;">
+            <h2 data-text="Paused">Paused</h2>
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <button id="resume-btn">Resume</button>
+                <button id="leave-world-btn">Leave World</button>
+            </div>
+        </div>
+
+
+        <!-- PERKS MENU -->
+        <div id="perk-menu" style="display: none;">
+            <div id="perk-container">
+
+                <h2 style="font-size: 5rem; margin: 0; display: inline-block">Character Perks</h2>
+
+                <hr>
+
+                <p id="perks-menu-points" style="font-size: 2rem; margin: 0; width: 100%; text-align:right">0 perk points</p>
+
+                <div class="perk-list">
+        
+                    <div class="perk-item">
+                        <img src="assets/ui/icons/fist.png" alt="Punch Strength">
+                        <h3>Punch Strength</h3>
+                        <p>Current: <span id="perk-val-punch">--</span></p>
+                        <button class="perk-upgrade-btn" onclick="upgradeStat('punch')">Upgrade</button>
+                    </div>
+
+                    <div class="perk-item">
+                        <img src="assets/ui/icons/health.png" alt="Max Health">
+                        <h3>Max Health</h3>
+                        <p>Current: <span id="perk-val-health">--</span></p>
+                        <button class="perk-upgrade-btn" onclick="upgradeStat('health')">Upgrade</button>
+                    </div>
+
+                    <div class="perk-item">
+                        <img src="assets/ui/icons/movement_speed.png" alt="Movement Speed">
+                        <h3>Movement Speed</h3>
+                        <p>Current: <span id="perk-val-speed">--</span></p>
+                        <button class="perk-upgrade-btn" onclick="upgradeStat('speed')">Upgrade</button>
+                    </div>
+
+                    <div class="perk-item">
+                        <img src="assets/ui/icons/vision_range.png" alt="Max Vision Range">
+                        <h3>Max Vision Range</h3>
+                        <p>Current: <span id="perk-val-zoom">--</span></p>
+                        <button class="perk-upgrade-btn" onclick="upgradeStat('zoom')">Upgrade</button>
+                    </div>
+
+                </div>
+
+                <button id="perks-leave-btn">Back</button>
+
+            </div>
+        </div>
+
+        
+        <!-- GAME CANVAS -->
+        <canvas id="gameCanvas"></canvas>
+        <div id="screen-effects"></div>
+
+        <script src="libraries/assets.js"></script>
+        <script src="libraries/structures.js"></script>
+        <script src="libraries/trainingData.js"></script>
+        <script src="entities.js"></script>
+        <script src="visuals.js"></script>
+        <script src="worldGen.js"></script>
+        <script src="menus.js"></script>
+        <script src="aiHandler.js"></script>
+        <script src="questSystem.js"></script>
+        <script src="player.js"></script>
+        <script src="main.js"></script>
+    </body>
+</html>
