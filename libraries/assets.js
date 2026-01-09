@@ -161,6 +161,26 @@ const ASSET_LIBRARY = {
         isFlat: true,
         hasCollision: false,
     },
+    'blue_parchment': {
+        isItem: true,
+        src: ITEMS_PATH + 'blue_parchment.png',
+        width: 80,
+        height: 80,
+        minScale: 0.8,
+        maxScale: 1,
+        isFlat: true,
+        hasCollision: false,
+    },
+    'red_parchment': {
+        isItem: true,
+        src: ITEMS_PATH + 'red_parchment.png',
+        width: 80,
+        height: 80,
+        minScale: 0.8,
+        maxScale: 1,
+        isFlat: true,
+        hasCollision: false,
+    },
     //#endregion
 
     //#region ENTITIES
@@ -881,13 +901,19 @@ const ASSET_LIBRARY = {
         isFlat: false,
         hasCollision: true
     },
-    'sandstone_well': {
-        src: DEFAULT_PATH + 'sandstone_well.png',
-        width: 140,
-        height: 145,
-        hitboxHeight: 135,
+    'vegetable_basket': {
+        src: DEFAULT_PATH + 'vegetable_basket.png',
+        width: 70,
+        height: 80,
         isFlat: false,
         hasCollision: true
+    },
+    'sunflower': {
+        src: DEFAULT_PATH + 'sunflower.png',
+        width: 70,
+        height: 140,
+        isFlat: false,
+        hasCollision: false
     }
     //#endregion
 };

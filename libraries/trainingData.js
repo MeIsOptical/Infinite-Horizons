@@ -44,6 +44,7 @@ const DATA_WORLD_EXAMPLES = [
                         { type: "tall_clay_pot", count: 10 },
                         { type: "direction_wooden_sign", count: 10 },
                         { type: "small_rock", count: 20 },
+                        { type: "vegetable_basket", count: 20 },
                     ],
                     items: [
                         {
@@ -212,7 +213,28 @@ const DATA_WORLD_EXAMPLES = [
                         { type: "blue_spirit", name: "Forest Spirit", nameVisibility: true, health: 800, count: 10, behavior: "neutral" },
                         { type: "blue_tengu", name: "Dark Wizard", nameVisibility: true, health: 600, count: 5, behavior: "hostile" }
                     ]
-                }
+                },
+                {
+                    name: "Sunflower Field",
+                    skyTint: "#ffe186ff",
+                    rarity: 30,
+                    groundColor: "#75b052ff",
+                    groundNoiseIntensity: 0.06,
+                    structureLegend: { "W": "#443f38ff", "F": "#c7c7a4ff" },
+                    structureGenerationType: "scattered",
+                    structures: [],
+                    objects: [
+                        { type: "sunflower", count: 500 },
+                        { type: "yellow_flower", count: 60 },
+                        { type: "grass_patch", count: 30 },
+                        { type: "bush", count: 15 },
+                        { type: "small_rock", count: 10 },
+                    ],
+                    items: [],  
+                    entities: [
+                        { type: "chicken", name: null, nameVisibility: false, health: 30, count: 7, behavior: "flee" },
+                    ]
+                },
             ]
         })}]
     },
